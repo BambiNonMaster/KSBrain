@@ -108,7 +108,7 @@ if __name__ == '__main__':
     brain = Brain(config_file)
     brain.add_processor(Processor())
     brain.add_model(Model1())
-    # brain.add_model(Model2())
+    brain.add_model(Model2())
     # brain.add_model(Model3())
     # brain.add_model(Model4())
     brain.run()

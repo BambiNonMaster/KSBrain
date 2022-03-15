@@ -17,7 +17,7 @@ base:
     split: 0.7                  # 训练集测试集分割比例
 
 processor:  
-    active: true               # 是否执行该模块
+    active: false               # 是否执行该模块
     temp: true                  # 是否保存所有中间结果到本地
     transform:                  # 特征变形方式
         log: true               # 取对数(只对大于1的数据列)
@@ -40,9 +40,6 @@ processor:
             params:             # 方法参数
         lasso:
             params:             # 方法参数
-                djaig: fadjl
-                djlag: dfkda
-                dklaj: elfj
 
 models:
     base:
@@ -54,31 +51,38 @@ models:
         path: 10                # 预测未来多少期路径
         optimize: rmse          # 优化目标 "rmse", "", "accuracy"
 
-    classifier:                         # 分类模型参数配置
-        active: true                    # 是否执行模型
-        ensemble:                       # 组合模型参数
-            voting: hard                # hard/soft
-            weights:                    # 每个模型权重
+    classifier:                             # 分类模型参数配置
+        active: true                        # 是否执行模型
+        ensemble:                           # 组合模型参数
+            voting: hard                    # hard/soft
+            weights:                        # 每个模型权重
         models:
-            - add_model:                # 模型名称
-                name:                   # 模型名称
-                params:                 # 模型参数
-            - add_model:                # 模型名称
-                params:                 # 模型参数
+            LogisticRegression:             # 模型名称
+                params:                     # 模型参数
+                    random_state: 0
+                    max_iter: 500           # 迭代次数太少可能无法收敛
+            RandomForestClassifier:         # 模型名称
+                params:                     # 模型参数
+                    n_estimators: 100       #
+                    max_depth: 100          #
+                    min_samples_split: 2    #
+                    random_state: 0
 
-    regressor:                          # 回归模型参数配置
-        active: true                    # 是否执行模型
-        ensemble:                       # 组合模型参数
-            weights:                    # 每个模型权重(要么不填, 要么和模型数量保持一致)
+
+    regressor:                              # 回归模型参数配置
+        active: false                       # 是否执行模型
+        ensemble:                           # 组合模型参数
+            weights: [1, 5]                 # 每个模型权重(要么不填, 要么和模型数量保持一致)
         models:
-            LinearRegression:                # 模型名称
+            LinearRegression:               # 模型名称
                 params:                     # 模型参数
                     fit_intercept: true     #
                     copy_X: true            #
             RandomForestRegressor:          # 模型名称
                 params:                     # 模型参数
-                    n_estimators: 1         #
-                    max_depth: 100
+                    n_estimators: 100       # 估计器数量
+                    max_depth: 100          # 最大深度
+                    random_state: 0         # 避免随机
 
 
     univariate:                         # 单变量模型参数配置

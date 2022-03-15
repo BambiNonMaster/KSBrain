@@ -1,10 +1,10 @@
 from pandas import DataFrame, Series, read_csv, read_excel
 from traceback import extract_stack
-from .ks_log import KsLog
 from .ks_utility import virtual
 from statsmodels.tsa.stattools import adfuller
 from scipy.stats import ttest_1samp, ttest_ind, f_oneway
 from typing import Callable
+from logging import Logger
 
 
 """
@@ -35,14 +35,14 @@ modify: 20220315
 class KsProcessor:
     def __init__(self):
         self._config = None
-        self._log: KsLog = KsLog()
+        self._log: Logger = None
         self._data: DataFrame = DataFrame()
         self._result: dict = {}                  # 结果保存字典
 
         self._drop_const: bool = False           # 判断是否删除值全相同的列
         self._split_index = None                 # 记录训练集和测试集那个分割索引    
 
-    def init(self, config=None, log: KsLog = None):
+    def init(self, config=None, log: Logger = None):
         """
         数据处理对象初始化, 传入配置对象和日志对象即可
         :param config:
@@ -111,7 +111,7 @@ class KsProcessor:
         elif data_file.endswith("xlsx"):
             self._data = read_excel(data_file, engine="openpyxl", index_col=0, sheet_name=0)
 
-        self._log.log_info(f"原始数据: {self._data.shape}")
+        self._log.info(f"原始数据: {self._data.shape}")
         
         return self._data
 
@@ -142,7 +142,7 @@ class KsProcessor:
         self._result[f"data_{func}"] = str(self._data.shape[0])
 
         # 输出日志
-        self._log.log_info(f"进入 {func} 数据量: {self._data.shape}")
+        self._log.info(f"进入 {func} 数据量: {self._data.shape}")
 
     @virtual
     def transform(self, data: DataFrame = None, callabck: Callable = None):
@@ -259,20 +259,20 @@ class KsProcessor:
             anova = level.get("anova", None)
             if adf:
                 analysis_result = analysis_result[analysis_result["p_adf"] < adf]
-                self._log.log_info(f"通过 adf 检验的因子有 {analysis_result.shape[0]} 个")
+                self._log.info(f"通过 adf 检验的因子有 {analysis_result.shape[0]} 个")
                 # 保存数据检验结果
                 self._result["pass_adf"] = analysis_result
             else:
-                self._log.log_warning("缺少adf检验参数")
+                self._log.warning("缺少adf检验参数")
             if ttest and anova:
                 analysis_result = analysis_result[(analysis_result["p_t"] < ttest) | (analysis_result["p_anova"] < anova)]
-                self._log.log_info(f"通过 t/anova 检验的因子有 {analysis_result.shape[0]} 个")
+                self._log.info(f"通过 t/anova 检验的因子有 {analysis_result.shape[0]} 个")
                 # 保存数据检验结果
                 self._result["pass_t/anova"] = analysis_result
             else:
-                self._log.log_warning("缺少 t 检验或 anova 检验参数")
+                self._log.warning("缺少 t 检验或 anova 检验参数")
         else:
-            self._log.log_warning("没有设置假设检验参数")
+            self._log.warning("没有设置假设检验参数")
 
         # 将 label 列和筛选的因子列都添加进来
         columns = ["label", ] + analysis_result.index.tolist()
@@ -299,7 +299,7 @@ class KsProcessor:
         else:
             self._data = callabck(self._data)
 
-        self._log.log_info(f"最终数据: {self._data.shape}")
+        self._log.info(f"最终数据: {self._data.shape}")
         return self._data
 
     def _stepwise(self):

@@ -1,11 +1,12 @@
 import logging
 from logging.handlers import TimedRotatingFileHandler
 from .ks_utility import singleton
+from logging import Logger
 
 """
 author: mengru.du
 create: 2022.3.12
-modify: 20220312
+modify: 20220315
 
 该文件定义了日志类
 1. 初始化日志对象
@@ -17,7 +18,7 @@ modify: 20220312
 @singleton
 class KsLog:
     def __init__(self):
-        self.ks_log: logging = logging.getLogger("ks_brain")
+        self.ks_log: Logger = logging.getLogger("ks_brain")
         self.ks_log.setLevel(logging.INFO)
         # 默认日志输出控制台
         self.add_stream_log()
@@ -44,11 +45,6 @@ class KsLog:
         stream_log.setLevel(logging.INFO)
         self.ks_log.addHandler(stream_log)
 
-    def log_info(self, msg):
-        self.ks_log.info(msg)
-
-    def log_warning(self, msg):
-        self.ks_log.warning(msg)
-
-
-
+    @property
+    def get_log(self) -> Logger:
+        return self.ks_log

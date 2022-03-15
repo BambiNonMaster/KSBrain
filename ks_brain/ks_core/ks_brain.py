@@ -3,10 +3,11 @@ from os import chdir, mkdir
 from sys import argv
 from yaml import safe_load
 from pandas import DataFrame
-from .ks_log import KsLog
+from logging import Logger
 from .ks_processor import KsProcessor
 from .ks_models import KsModel
 from typing import List, Dict
+from .ks_log import KsLog
 
 
 """
@@ -27,7 +28,7 @@ class KsBrain:
     def __init__(self):
         self._config = None                             # 配置文件对象
         self._storage: str = ""                         # 数据保存目录
-        self._log = KsLog()                                # 日志对象
+        self._log: Logger = None                        # 日志对象
         self._results: dict = {}                        # 结果保存对象
         self.processor: KsProcessor = KsProcessor()     # 数据处理对象(一个)
         self.models: List[KsModel] = []                 # 模型对象列表(多个)
@@ -46,7 +47,7 @@ class KsBrain:
         if env.get("data_file", None):
             chdir(dirname(abspath(env["data_file"])))
         else:
-            self._log.log_warning("数据文件不存在")
+            self._log.warning("数据文件不存在")
             return
 
         # 4. 添加数据保存目录或默认 ks_storage
@@ -58,11 +59,12 @@ class KsBrain:
             mkdir(self._storage)
 
         # 5. 设置日志
-        self._log = KsLog()
+        log = KsLog()
         log_file = env.get("log_file", None)
         if log_file:
             log_file = self._storage + "/" + log_file
-            self._log.add_file_log(log_file)
+            log.add_file_log(log_file)
+            self._log = log.get_log
 
     @staticmethod
     def load_config(file_name: str):
@@ -113,7 +115,7 @@ class KsBrain:
             self._results[type(self.processor).__base__.__name__] = self.processor.get_result
             # 1.2 如果因子筛选为空, 报错
             if self.processor.empty:
-                self._log.log_warning("因子筛选数据为空")
+                self._log.warning("因子筛选数据为空")
                 return
             else:
                 # 如果因子筛选成功, 利用因子筛选结果初始化预测模型
@@ -127,3 +129,4 @@ class KsBrain:
                 model.run()
                 # 2.1 保存模型数据
                 self._results[type(model).__base__.__name__] = model.get_result
+        print(self._results.keys())

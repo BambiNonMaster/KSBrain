@@ -1,0 +1,21 @@
+安装: 默认安装即可
+
+打开git窗口
+鼠标右击: Git Bash Here
+
+ssh 验证(避免每次验证)
+参考: https://www.cnblogs.com/manmanrenshenglu/p/9012987.html
+
+初始化git
+gint init
+
+添加远程仓库名(用origin 替代网址)
+git remote add origin https://github.com/dumengru/KSBrain.git
+
+
+最常用三条命令
+
+git pull 	将远程文件下拉到本地
+git add ./     添加目录"./"下所有文件到临时区
+git commit -m "写备注" ./    将临时区文件添加到本地仓库   
+git push origin master    将本地仓库文件推送到git上master分支下
