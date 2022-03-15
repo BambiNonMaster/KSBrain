@@ -13,6 +13,15 @@ import re
 from os import remove, listdir
 
 
+"""
+author: mengru.du
+create: 2022.3.15
+modify: 20220315
+
+该文件定义文档输出基本框架类
+"""
+
+
 class DocxModel():
     def __init__(self, config: dict):
         """ 创建文件 """

@@ -3,6 +3,15 @@
 from docx.enum.text import WD_PARAGRAPH_ALIGNMENT
 
 
+"""
+author: mengru.du
+create: 2022.3.15
+modify: 20220315
+
+该文件定义文档输出相关设置
+"""
+
+
 WORD_SETTING = {
     # 1. 设置正文格式
     "英文字体": "Times New Roman",
