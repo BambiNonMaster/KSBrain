@@ -1,0 +1,103 @@
+# 配置数据处理部分
+# 原始数据第一列是date, 第二列是价格， 其他列是特征
+# label 必须转为收益率
+# 因子筛选方法: lasso, greedy, step
+
+# 值预测: 预测未来某期值
+# 路径预测： 预测未来n期路径
+# 准确率: 计算准确率
+# 监督学习模型只能进行值预测, 调参目标是收益率
+# 统计分析可以做路径预测, 调参目标是RMSE; 值预测
+
+env:
+    data_file: usdx.csv        # 数据文件路径(相对脚本路径)
+    result_dir:                # 结果保存目录(相对脚本路径)
+    log_file: test_log.log      # 配置日志文件
+base:
+    split: 0.7                  # 训练集测试集分割比例
+
+processor:  
+    active: true               # 是否执行该模块
+    temp: true                  # 是否保存所有中间结果到本地
+    transform:                  # 特征变形方式
+        log: true               # 取对数(只对大于1的数据列)
+        diff: [1, 2, 4,12]
+    standardize:
+        n_std: 1.96            # 处理极值
+        scale: true            # 标准化
+    level:                     # 特征检验参数
+        adf: 0.001
+        ttest: 0.001
+        anova: 0.001
+
+    select: stepwise            # 选择因子挑选方法
+    methods:                    # 内置三种因子筛选方法
+        stepwise:
+            params:             # 方法参数
+                p_threshold:    #
+                correlation:    #
+        greedy:
+            params:             # 方法参数
+        lasso:
+            params:             # 方法参数
+                djaig: fadjl
+                djlag: dfkda
+                dklaj: elfj
+
+models:
+    base:
+        temp: true              # 是否保存所有中间结果到本地
+        mode: true              # 是否循环训练
+        freq: 5                 # 每隔几期重新训练
+        window: 100             # 每次训练使用多少条数据
+        value: 1                # 预测第n期的值
+        path: 10                # 预测未来多少期路径
+        optimize: rmse          # 优化目标 "rmse", "", "accuracy"
+
+    classifier:                         # 分类模型参数配置
+        active: true                    # 是否执行模型
+        ensemble:                       # 组合模型参数
+            voting: hard                # hard/soft
+            weights:                    # 每个模型权重
+        models:
+            - add_model:                # 模型名称
+                name:                   # 模型名称
+                params:                 # 模型参数
+            - add_model:                # 模型名称
+                params:                 # 模型参数
+
+    regressor:                          # 回归模型参数配置
+        active: true                    # 是否执行模型
+        ensemble:                       # 组合模型参数
+            weights:                    # 每个模型权重(要么不填, 要么和模型数量保持一致)
+        models:
+            LinearRegression:                # 模型名称
+                params:                     # 模型参数
+                    fit_intercept: true     #
+                    copy_X: true            #
+            RandomForestRegressor:          # 模型名称
+                params:                     # 模型参数
+                    n_estimators: 1         #
+                    max_depth: 100
+
+
+    univariate:                         # 单变量模型参数配置
+        active: true                    # 是否执行模型
+        models:
+            - add_model:                # 模型名称
+                name:                   # 模型名称
+                params:                 # 模型参数
+            - add_model:                # 模型名称
+                params:                 # 模型参数
+
+    multivariate:                       # 多变量模型参数配置
+        active: true                    # 是否执行模型
+        models:
+            - add_model:                # 模型名称
+                name:                   # 模型名称
+                params:                 # 模型参数
+            - add_model:                # 模型名称
+                params:                 # 模型参数
+
+document:
+    active: true                    # 是否生成报告文档
